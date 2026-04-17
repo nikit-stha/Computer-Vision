@@ -49,3 +49,7 @@ def register():
 @app.route("/face")
 def face_detection():
     return render_template("face_detection.html")
+
+@app.route("/volume_control")
+def volume_control():
+    return render_template("volume_control.html")

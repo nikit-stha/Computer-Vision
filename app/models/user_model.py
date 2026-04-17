@@ -2,6 +2,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm as so
 from app import db
 
+
 class User(db.Model):
     __tablename__ = "user"
 
@@ -9,4 +10,4 @@ class User(db.Model):
     username: so.Mapped[str] = so.mapped_column(sa.String(256))
 
     qr_codes: so.Mapped[list["QR"]] = so.relationship(back_populates="user")
-    faces: so.Mapped[list["Face"]] = so.relationship(back_populates="user")
+    faces: so.Mapped["Face"] = so.relationship(back_populates="user")

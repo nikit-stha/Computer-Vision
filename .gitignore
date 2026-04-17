@@ -2,5 +2,11 @@ __pycache__/
 *.pyc
 
 .env
+migrations/
 
 venv/
+
+config/
+.db
+
+static/
