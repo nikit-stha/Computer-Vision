@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Read QR</h2>
+
+<video id="video" width="400" height="300" autoplay playsinline="display : none"></video>
+<img id="output" width="400" height="300">
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => document.getElementById("video").srcObject = stream)
+
+function sendFrame() {
+    let canvas = document.getElementById("canvas")
+    let ctx = canvas.getContext("2d")
+
+    canvas.width = 400
+    canvas.height = 300
+    ctx.drawImage(video, 0, 0, 400, 300)
+
+    let image = canvas.toDataURL("image/jpeg")
+
+    fetch("/detect_qr", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({image: image})
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("output").src = data.image
+    })
+}
+
+setInterval(sendFrame, 50)
+</script>
+{% endblock %}

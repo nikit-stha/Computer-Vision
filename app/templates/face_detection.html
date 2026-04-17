@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Face Recognition</h1>
+
+    <video id="video" autoplay playsinline style="display:none;"></video>
+    <img id="output">
+    <p id="status">Starting...</p>
+
+    <script>
+        const video = document.getElementById("video");
+        const output = document.getElementById("output");
+        const statusText = document.getElementById("status");
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        let unknownCounter = 0;
+        let redirected = false;
+
+        async function startCamera() {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            video.srcObject = stream;
+        }
+
+        async function sendFrame() {
+            if (redirected) return;
+
+            if (video.videoWidth === 0 || video.videoHeight === 0) {
+                requestAnimationFrame(sendFrame);
+                return;
+            }
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = canvas.toDataURL("image/jpeg");
+
+                const response = await fetch("/detect_face", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image: imageData })
+                });
+
+                const data = await response.json();
+                output.src = data.image;
+
+                if (data.face_detected) {
+                    if (data.recognized) {
+                        unknownCounter = 0;
+                        statusText.textContent = "Recognized: " + data.name;
+                    } else {
+                        unknownCounter++;
+                        statusText.textContent = "Unknown: " + unknownCounter;
+
+                        if (unknownCounter >= 10 && data.temp_face) {
+                            redirected = true;
+                            const filename = encodeURIComponent(data.temp_face.filename);
+                            const location = encodeURIComponent(JSON.stringify(data.temp_face.location));
+                            window.location.href = "/register?face=" + filename + "&location=" + location;
+                            return;
+                        }
+                    }
+                } else {
+                    unknownCounter = 0;
+                    statusText.textContent = "No face";
+                }
+
+            setTimeout(sendFrame, 300);
+        }
+
+        startCamera().then(() => {
+            video.addEventListener("loadeddata", () => {
+                sendFrame();
+            });
+        });
+    </script>
+{% endblock %}

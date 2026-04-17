@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+</head>
+<body>
+    <h1>Register Face</h1>
+
+    {% if face %}
+        <img src="{{ url_for('static', filename='temp_faces/' + face) }}" width="300">
+    {% endif %}
+
+    <form method="POST">
+        <input type="hidden" name="temp_face_filename" value="{{ face }}">
+        <input type="hidden" name="face_location" value='{{ face_location| tojson }}'>
+
+        <input type="text" name="username" placeholder="Enter name" required>
+        <button type="submit">Register</button>
+    </form>
+</body>
+</html>
