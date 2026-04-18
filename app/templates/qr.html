@@ -21,7 +21,7 @@ function sendFrame() {
 
     let image = canvas.toDataURL("image/jpeg")
 
-    fetch("/detect_qr", {
+    fetch("/API/detect_qr", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({image: image})

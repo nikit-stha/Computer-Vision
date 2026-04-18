@@ -5,7 +5,7 @@ from cvzone.HandTrackingModule import HandDetector
 import math
 import os
 
-detector = HandDetector(detectionCon=0.8)
+detector = HandDetector(detectionCon=0.9)
 
 def process_hand_image(image_data):
     img = cv2.imdecode(

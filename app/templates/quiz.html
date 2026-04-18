@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Hand Detection</h2>
+
+<video id="video" width="1280" height="720" style="display:none;" autoplay playsinline></video>
+<img id="output" width="1280" height="720">
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const output = document.getElementById("output");
+
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => {
+    video.srcObject = stream;
+    return video.play();
+})
+.catch(err => {
+    console.error("Camera access error:", err);
+});
+
+function sendFrame() {
+    if (video.readyState < 2) return;
+
+    canvas.width = 1280;
+    canvas.height = 720;
+    ctx.drawImage(video, 0, 0, 1280, 720);
+
+    let image = canvas.toDataURL("image/jpeg");
+
+    fetch("/API/quiz", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ image: image })
+    })
+    .then(res => res.json())
+    .then(data => {
+        output.src = data.image;
+    })
+    .catch(err => {
+        console.error("Fetch error:", err);
+    });
+}
+
+setInterval(sendFrame, 50);
+</script>
+{% endblock %}
